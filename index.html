@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Trade Island · 무역섬 생활</title>
+  <meta name="description" content="아늑한 3D 무역섬을 돌아다니며 동물 주민들에게 무역 실무를 배우고, 미니게임으로 복습하는 웹 게임" />
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+  <meta name="theme-color" content="#36b5a2" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- 게임 화면 -->
+    <canvas id="game" aria-label="무역섬 게임 화면"></canvas>
+
+    <!-- 3D 캐릭터 위에 뜨는 이름표 · 말풍선 레이어 -->
+    <div class="labels" id="labels" aria-hidden="true"></div>
+
+    <!-- 화면 밖 전문가 방향 안내 -->
+    <div class="guide-arrow hidden" id="guide-arrow" aria-hidden="true">
+      <span class="ga-pointer"></span>
+      <span class="ga-icon"></span>
+      <span class="ga-tip"></span>
+    </div>
+
+    <!-- 상단 HUD -->
+    <header class="hud">
+      <div class="panel hud-card">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">🌴</div>
+          <div class="brand-text">
+            <strong>TRADE ISLAND</strong>
+            <small>무역섬 생활 · 무역 실무 어드벤처</small>
+          </div>
+          <button class="icon-btn" id="sound-btn" type="button" aria-label="소리 끄기">🔊</button>
+        </div>
+        <div class="progress-row">
+          <div class="progress-head">
+            <span>만난 무역 전문가</span>
+            <span class="progress-count"><b id="met-count">0</b> / <span id="met-total">6</span></span>
+          </div>
+          <div class="progress-bar"><i id="progress-fill"></i></div>
+          <ul class="chips" id="npc-chips"></ul>
+        </div>
+        <div class="badge-row">
+          <span class="badge-title">🏅 챌린지 배지 <b id="badge-count">0</b>/4</span>
+          <ul class="chips" id="badge-chips"></ul>
+        </div>
+      </div>
+    </header>
+
+    <!-- 미니맵 -->
+    <aside class="minimap panel" id="minimap-card">
+      <div class="minimap-head">
+        <strong>ISLAND MAP</strong>
+        <span id="zone-name">무역섬</span>
+      </div>
+      <canvas id="minimap"></canvas>
+      <div class="minimap-legend">
+        <span><i class="lg-unmet"></i>전문가</span>
+        <span><i class="lg-game"></i>미니게임</span>
+        <span><i class="lg-me"></i>나</span>
+      </div>
+    </aside>
+
+    <!-- 조작 가이드 -->
+    <aside class="guide panel" id="guide">
+      <h3>HOW TO PLAY</h3>
+      <ul>
+        <li><span class="keys"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></span><kbd>WASD</kbd> 이동</li>
+        <li><kbd>Shift</kbd> 달리기 · <kbd>Space</kbd> 점프</li>
+        <li><kbd>Space</kbd> / <kbd>Enter</kbd> 대화 · 게임</li>
+        <li><kbd>Esc</kbd> 닫기 · 마우스 휠 줌</li>
+        <li><kbd>M</kbd> 지도 · <kbd>H</kbd> 가이드 접기</li>
+      </ul>
+    </aside>
+
+    <!-- 근접 안내 팝업 -->
+    <div class="interact-hint hidden" id="interact-hint" role="button" aria-live="polite">
+      <div class="hint-inner" id="hint-inner"></div>
+    </div>
+
+    <!-- 말풍선 대화창 -->
+    <section class="dialog" id="dialog" role="dialog" aria-hidden="true" aria-label="주민 대화">
+      <div class="dialog-portrait"><canvas id="portrait"></canvas></div>
+      <div class="dialog-bubble">
+        <div class="dialog-nametag">
+          <span id="dialog-name"></span>
+          <small id="dialog-role"></small>
+        </div>
+        <p class="dialog-text" id="dialog-text"></p>
+        <div class="dialog-links" id="dialog-links" hidden></div>
+        <div class="dialog-foot">
+          <div class="dots" id="dialog-dots"></div>
+          <span class="dialog-step" id="dialog-step"></span>
+          <button class="text-btn" id="dialog-prev" type="button">이전</button>
+          <button class="text-btn" id="dialog-close" type="button">닫기 <kbd>Esc</kbd></button>
+          <button class="next-btn" id="dialog-next" type="button"><span>다음</span><i aria-hidden="true">▼</i></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 미니게임 창 -->
+    <div class="overlay hidden game-overlay" id="game-modal">
+      <div class="modal panel game-card" role="dialog" aria-label="무역 챌린지">
+        <header class="game-head">
+          <span class="game-icon" id="game-icon"></span>
+          <div>
+            <span class="eyebrow">TRADE CHALLENGE</span>
+            <h2 id="game-title"></h2>
+          </div>
+          <button class="icon-btn" id="game-close" type="button" aria-label="닫기">✕</button>
+        </header>
+        <div class="game-body" id="game-body"></div>
+      </div>
+    </div>
+
+    <!-- 터치 기기용 컨트롤 -->
+    <div class="touch-pad" id="dpad" aria-hidden="true">
+      <button type="button" data-dir="up">▲</button>
+      <button type="button" data-dir="left">◀</button>
+      <button type="button" data-dir="right">▶</button>
+      <button type="button" data-dir="down">▼</button>
+    </div>
+    <button class="action-btn" id="action-btn" type="button">A</button>
+
+    <!-- 토스트 알림 -->
+    <div class="toast" id="toast" role="status"></div>
+
+    <!-- 시작 화면 -->
+    <div class="overlay" id="intro">
+      <div class="modal panel intro-card">
+        <div class="intro-art" aria-hidden="true">
+          <span>🌴</span><span>🚢</span><span>📦</span><span>🏛️</span><span>📑</span><span>💳</span>
+        </div>
+        <span class="eyebrow">WELCOME TO TRADE ISLAND</span>
+        <h1>무역섬에서 시작하는<br />나의 첫 무역 실무</h1>
+        <p class="lead">
+          아늑한 무역섬의 동물 주민들이 무역의 기초부터 인코텀즈, 컨테이너 화물, 통관과 관세,
+          선적서류, 대금결제까지 차근차근 알려줘요. 곳곳의 챌린지 부스에서 미니게임으로 실력도 확인해 보세요!
+        </p>
+        <ul class="steps">
+          <li><span class="ico">🧭</span><span><kbd>방향키</kbd> / <kbd>WASD</kbd>로 섬을 산책해요 <small>Shift 달리기 · Space 점프</small></span></li>
+          <li><span class="ico">💬</span><span>머리 위에 <b>!</b> 가 있는 주민에게 다가가 <kbd>Space</kbd> <small>관련 사이트 바로가기 버튼도 있어요</small></span></li>
+          <li><span class="ico">🎮</span><span>무역 챌린지 부스 4곳에서 미니게임 <small>배지를 모아보세요!</small></span></li>
+        </ul>
+        <div class="modal-actions">
+          <span class="modal-tip">🔊 배경음악과 함께 즐겨요 · <kbd>Enter</kbd> 로 시작</span>
+          <button class="btn primary lg" id="start-btn" type="button">섬으로 출발하기 🌴</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 수료 화면 -->
+    <div class="overlay hidden" id="complete">
+      <div class="modal panel">
+        <span class="eyebrow">COMPLETE 🎉</span>
+        <h1>무역섬 투어를<br />모두 마쳤어요!</h1>
+        <p class="lead">섬의 모든 전문가를 만났어요. 오늘 배운 내용을 한눈에 정리해 볼까요?</p>
+        <ul class="steps" id="summary-list"></ul>
+        <div class="modal-actions">
+          <a class="btn" href="incoterms.html" target="_blank" rel="noopener">📘 인코텀즈 가이드</a>
+          <button class="btn" id="reset-btn" type="button">처음부터</button>
+          <button class="btn primary" id="continue-btn" type="button">계속 둘러보기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+  <script src="js/npc.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/dialog.js"></script>
+  <script src="js/minigames.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

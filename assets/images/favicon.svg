@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fe3da"/>
+      <stop offset="1" stop-color="#2a9886"/>
+    </linearGradient>
+  </defs>
+  <!-- 배경 -->
+  <rect width="64" height="64" rx="16" fill="url(#sky)"/>
+  <!-- 컨테이너 -->
+  <rect x="14" y="21" width="11" height="8" rx="1.5" fill="#f28b6b"/>
+  <rect x="26" y="21" width="11" height="8" rx="1.5" fill="#f7cd46"/>
+  <rect x="38" y="21" width="11" height="8" rx="1.5" fill="#5b7cfa"/>
+  <rect x="20" y="13" width="11" height="8" rx="1.5" fill="#9b86e8"/>
+  <rect x="32" y="13" width="11" height="8" rx="1.5" fill="#ffffff"/>
+  <!-- 선체 -->
+  <path d="M8 30h48l-6 13H14z" fill="#2b3a5c"/>
+  <path d="M10 34h44" stroke="#e8607a" stroke-width="2.5"/>
+  <!-- 물결 -->
+  <path d="M6 49c4 0 4-3 8-3s4 3 8 3 4-3 8-3 4 3 8 3 4-3 8-3 4 3 8 3 4-3 4-3" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+</svg>

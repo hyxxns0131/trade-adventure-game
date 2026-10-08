@@ -1,0 +1,18 @@
+{
+  "name": "trade-adventure-game",
+  "version": "1.0.0",
+  "description": "아늑한 3D 무역섬을 돌아다니며 동물 주민에게 무역 실무를 배우고 미니게임으로 복습하는 웹 게임 (Three.js)",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes http-server . -p 5173 -c-1 -o",
+    "check": "node --check js/npc.js && node --check js/audio.js && node --check js/dialog.js && node --check js/minigames.js && node --check js/player.js && node --check js/main.js"
+  },
+  "keywords": [
+    "trade",
+    "incoterms",
+    "education",
+    "canvas",
+    "game"
+  ],
+  "license": "MIT"
+}
